@@ -1,0 +1,7 @@
+cookies.pkl
+__pycache__/
+*.pyc
+chromedriver.log
+.env
+.venv/
+venv/
