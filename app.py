@@ -11,7 +11,7 @@ def is_cookies_empty(filename="cookies.pkl"):
     # Check if the cookies file is empty
     return not os.path.exists(filename) or os.path.getsize(filename) == 0
 
-def leave_a_comment(channel_url, comments):
+def leave_a_comment(channel_url, comments, num_comments):
     print(f"Opening channel: {channel_url}")
     # Wait a moment to allow the page to load
     time.sleep(2)
@@ -53,31 +53,35 @@ def leave_a_comment(channel_url, comments):
     # Delay to load the comments section
     time.sleep(4)
 
-    # Click on the comment input box
-    print("Clicking comment input box")
-    comment_input_box = driver.find_elements(By.XPATH, '//*[@id="placeholder-area"]')
-    comment_input_box[-1].click()
+    # Comment specified number of times
+    for i in range(num_comments):
+        print(f"Commenting {i+1}/{num_comments}")
+        # Click on the comment input box
+        print("Clicking comment input box")
+        comment_input_box = driver.find_elements(By.XPATH, '//*[@id="placeholder-area"]')
+        comment_input_box[-1].click()
 
-    time.sleep(1)
+        time.sleep(1)
 
-    # Type a comment
-    comment_text = get_random_comment(yt_comments)
-    print(f"Typing comment: {comment_text}")
-    comment_input = driver.find_elements(By.XPATH, '//*[@id="contenteditable-root"] ')
-    driver.execute_script('''
-    var commentInput = arguments[0];
-    commentInput.innerText = '{}';
-'''.format(comment_text), comment_input[-1])
-    comment_input[-1].send_keys('.')
-    comment_input[-1].send_keys(Keys.BACKSPACE)
+        # Type a comment
+        comment_text = get_random_comment(yt_comments)
+        print(f"Typing comment: {comment_text}")
+        comment_input = driver.find_elements(By.XPATH, '//*[@id="contenteditable-root"] ')
+        driver.execute_script('''
+        var commentInput = arguments[0];
+        commentInput.innerText = '{}';
+        '''.format(comment_text), comment_input[-1])
+        comment_input[-1].send_keys('.')
+        comment_input[-1].send_keys(Keys.BACKSPACE)
 
-    time.sleep(1)
+        time.sleep(1)
 
-    # Publish the comment
-    print("Publishing comment")
-    comment_button = driver.find_elements(By.XPATH, '//*[@id="submit-button"]/yt-button-shape/button/yt-touch-feedback-shape/div/div[2]')
-    comment_button[-1].click()
-    print("Comment published")
+        # Publish the comment
+        print("Publishing comment")
+        comment_button = driver.find_elements(By.XPATH, '//*[@id="submit-button"]/yt-button-shape/button/yt-touch-feedback-shape/div/div[2]')
+        comment_button[-1].click()
+        print("Comment published")
+        time.sleep(2)
 
 def get_random_comment(comments):
     return random.choice(comments)
@@ -107,6 +111,11 @@ if __name__ == "__main__":
 
     check_cookies(driver)
 
+    try:
+        num_comments = int(input("How many comments to write per video? "))
+    except Exception:
+        num_comments = 1
+
     channel_url_counter = 0
     yt_channels = []
     print("Loading channel URLs...")
@@ -126,7 +135,7 @@ if __name__ == "__main__":
     for channel_url in yt_channels:
         channel_url_counter += 1
         try:
-            leave_a_comment(channel_url, yt_comments)
+            leave_a_comment(channel_url, yt_comments, num_comments)
         except Exception as e:
             channel_url_counter -=1
             print(f"Błąd podczas komentowania kanału {channel_url}: {e}")
